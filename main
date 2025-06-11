@@ -1,0 +1,103 @@
+import datetime
+
+events = []
+def greet_user():
+    print("Привіт! Я - твій Організатор подій. Чим можу допомогти?")
+def show_help():
+    print("""
+Доступні команди:
+- допомога — показати цей список команд
+- додати подію — додати нову подію
+- показати події — показати всі події
+- події на тиждень — показати події поточного тижня
+- пошук за категорією — знайти події за категорією
+- видалити подію — видалити подію за назвою та датою
+- вийти — завершити роботу
+""")
+def add_event():
+    name = input("Введіть назву події: ")
+    date_str = input("Введіть дату (рррр-мм-дд): ")
+    try:
+        date = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        print("Невірний формат дати. Спробуйте ще раз.")
+        return
+    category = input("Введіть категорію або короткий опис події: ")
+    
+    event = {"name": name, "date": date, "category": category}
+    events.append(event)
+    print(f"Подію '{name}' додано.")
+def show_events():
+    if not events:
+        print("Подій немає.")
+        return
+    events_sorted = sorted(events, key=lambda e: e["date"])
+    print("Усі події:")
+    for e in events_sorted:
+        print(f"{e['date']} - {e['name']} ({e['category']})")
+        
+def events_this_week():
+    today = datetime.date.today()
+    start_week = today - datetime.timedelta(days=today.weekday())
+    end_week = start_week + datetime.timedelta(days=6)
+    
+    events_week = [e for e in events if start_week <= e["date"] <= end_week]
+    if not events_week:
+        print("Подій на цей тиждень немає.")
+        return
+    print(f"Події на тиждень з {start_week} по {end_week}:")
+    for e in sorted(events_week, key=lambda x: x["date"]):
+        print(f"{e['date']} - {e['name']} ({e['category']})")
+        
+def search_by_category():
+    category = input("Введіть категорію для пошуку: ").strip().lower()
+    filtered = [e for e in events if e["category"].lower() == category]
+    if not filtered:
+        print("Подій з такою категорією не знайдено.")
+        return
+    print(f"Події категорії '{category}':")
+    for e in sorted(filtered, key=lambda x: x["date"]):
+        print(f"{e['date']} - {e['name']}")
+        
+def delete_event():
+    name = input("Введіть назву події для видалення: ").strip()
+    date_str = input("Введіть дату події для видалення (рррр-мм-дд): ")
+    try:
+        date = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        print("Невірний формат дати.")
+        return
+    
+    for e in events:
+        if e["name"] == name and e["date"] == date:
+            events.remove(e)
+            print(f"Подію '{name}' видалено.")
+            return
+    print("Подію не знайдено.")
+    
+def main():
+    greet_user()
+    while True:
+        command = input("\nВведіть команду (допомога для списку команд): ").strip().lower()
+        if command == "допомога":
+            show_help()
+        elif command == "додати подію":
+            add_event()
+        elif command == "показати події":
+            show_events()
+        elif command == "події на тиждень":
+            events_this_week()
+        elif command == "пошук за категорією":
+            search_by_category()
+        elif command == "видалити подію":
+            delete_event()
+        elif command == "вийти":
+            print("До побачення!")
+            break
+        else:
+            print("Невідома команда. Спробуйте ще раз.")
+            
+if __name__ == "__main__":
+    main()
+    
+    
